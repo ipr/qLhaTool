@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextEdit>
+#include <QDateTime>
 
 #include "qlhalib.h"
 
@@ -28,10 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	treeHeaders << "Name" 
 			<< "Unpacked size" 
 			<< "Packed size" 
-			//<< "Time" 
-			//<< "Date" 
+			<< "Time" 
+			<< "Date" 
+			<< "Pack Mode" 
 			//<< "Attributes"
-			//<< "Pack Mode" 
 			//<< "CRC (A)" 
 			//<< "CRC (D)" 
 			<< "Comment";
@@ -153,16 +154,21 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			else
 			{
 				// merged? (no packed-size available)
-				//pSubItem->setText(2, "n/a");
+				// not supported by LHa...
 				pSubItem->setText(2, "(Merged)");
 			}
 			
-			/*
-			unsigned int year, month, day;
-			unsigned int hour, minute, second;
-			Entry.m_Header.GetTimestampParts(year, month, day, hour, minute, second);
-			*/
 
+			// TODO: check 
+			//pSubItem->setData(3, Qt::DisplayRole, Entry.m_Stamp.time());
+			QTime Time(Entry.m_Stamp.time());
+			pSubItem->setText(3, Time.toString("hh:mm:ss"));
+			
+			// TODO: check 
+			//pSubItem->setData(4, Qt::DisplayRole, Entry.m_Stamp.date());
+			QDate Date(Entry.m_Stamp.date());
+			pSubItem->setText(4, Date.toString("dd.MM.yyyy"));
+			
 			/*
 			QString szTime;
 			szTime.sprintf("%02ld:%02ld:%02ld", hour, minute, second);
@@ -175,8 +181,12 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			//pSubItem->setText(4, QDate(year, month, day).toString());
 			*/
 
+			// packing mode
+			pSubItem->setText(5, Entry.m_szPackMode);
+
+			
 			/*
-			// file-attributes (Amiga-style: HSPA RWED)
+			// LZX: file-attributes (Amiga-style: HSPA RWED)
 			QString szAttribs;
 			szAttribs.sprintf("%c%c%c%c%c%c%c%c", 
 							  (Entry.m_Attributes.h) ? 'h' : '-',
@@ -187,11 +197,8 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 							  (Entry.m_Attributes.w) ? 'w' : '-',
 							  (Entry.m_Attributes.e) ? 'e' : '-',
 							  (Entry.m_Attributes.d) ? 'd' : '-');
-			pSubItem->setText(5, szAttribs);
+			pSubItem->setText(6, szAttribs);
 			*/
-			
-			// packing mode
-			//pSubItem->setText(6, QString::number(Entry.m_Header.GetPackMode()));
 			
 			/*
 			QString szCrcA; // CRC of entry in archive
