@@ -19,5 +19,12 @@ FORMS    += mainwindow.ui
 
 INCLUDEPATH += ../qLhA
 LIBS += -lqLhA
-LIBS += -L../qLhA-build-desktop/debug
 
+CONFIG (debug, debug|release) 
+{
+    LIBS += -L../qLhA-build-desktop/debug
+} 
+CONFIG (release, debug|release) 
+{
+    LIBS += -L../qLhA-build-desktop/release
+}

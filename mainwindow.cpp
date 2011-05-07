@@ -13,24 +13,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
 	m_pLhaLib(nullptr),
 	m_szBaseTitle(),
-	m_szCurrentArchive()
+	m_szCurrentArchive(),
+	m_PathToItem()
 {
     ui->setupUi(this);
 	m_szBaseTitle = windowTitle();
 	connect(this, SIGNAL(FileSelection(QString)), this, SLOT(onFileSelected(QString)));
 	
 	m_pLhaLib = new QLhALib(this);
+	connect(m_pLhaLib, SIGNAL(message(QString)), this, SLOT(onMessage(QString)));
+	connect(m_pLhaLib, SIGNAL(warning(QString)), this, SLOT(onWarning(QString)));
 	
 	QStringList treeHeaders;
 	treeHeaders << "Name" 
 			<< "Unpacked size" 
 			<< "Packed size" 
-			<< "Time" 
-			<< "Date" 
-			<< "Attributes"
-			<< "Pack Mode" 
-			<< "CRC (A)" 
-			<< "CRC (D)" 
+			//<< "Time" 
+			//<< "Date" 
+			//<< "Attributes"
+			//<< "Pack Mode" 
+			//<< "CRC (A)" 
+			//<< "CRC (D)" 
 			<< "Comment";
 	ui->treeWidget->setColumnCount(treeHeaders.size());
 	ui->treeWidget->setHeaderLabels(treeHeaders);
@@ -48,12 +51,34 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+bool MainWindow::SplitPathFileName(const QString &szName, QString &szPath, QString &szFile)
+{
+	QString szFilePath = szName;
+	szFilePath.replace('\\', "/");
+	int iPos = szFilePath.lastIndexOf('/');
+	if (iPos == -1)
+	{
+		// no path
+		return false;
+	}
+
+	szFile = szFilePath.right(szFilePath.length() - iPos -1);
+	if (szFilePath.at(0) != '/')
+	{
+		szPath = "/";
+	}
+	szPath += szFilePath.left(iPos);
+	
+	// split done
+	return true;
+}
+
 void MainWindow::ClearAll()
 {
 	setWindowTitle(m_szBaseTitle);
 	
 	m_szCurrentArchive.clear();
-	//m_PathToItem.clear();
+	m_PathToItem.clear();
 	ui->treeWidget->clear();
 }
 
@@ -71,16 +96,13 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 	ClearAll(); // clear previous archive (if any)
 	try
 	{
+		QLhALib::tArchiveEntryList lstArchiveInfo;
+		
+		// set given file as archive
 		m_pLhaLib->SetArchive(szArchiveFile);
 	
 		// collect list of files
-		m_pLhaLib->List();
-		
-		/*
-		// open given file
-		tArchiveEntryList lstArchiveInfo;
-		CUnLzx ul(szArchiveFile.toStdString());
-		ul.View(lstArchiveInfo);
+		m_pLhaLib->List(lstArchiveInfo);
 		
 		// success: keep some info
 		setWindowTitle(m_szBaseTitle + " - " + szArchiveFile);
@@ -90,9 +112,10 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 		auto itEnd = lstArchiveInfo.end();
 		while (it != itEnd)
 		{
-			CArchiveEntry &Entry = it->second;
+			QLhALib::CArchiveEntry &Entry = (*it);
 			
 			// skip "merge" instances (if any)
+			// (LZX only, not in LHa)
 			if (Entry.m_szFileName.length() < 1)
 			{
 				++it;
@@ -101,12 +124,11 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 
 			QString szPath;
 			QString szFile;
-			QString szName = QString::fromStdString(Entry.m_szFileName);
 			
-			if (SplitPathFileName(szName, szPath, szFile) == false)
+			if (SplitPathFileName(Entry.m_szFileName, szPath, szFile) == false)
 			{
 				// no path
-				szFile = szName;
+				szFile = Entry.m_szFileName;
 				szPath = "/";
 			}
 			
@@ -135,11 +157,13 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 				pSubItem->setText(2, "(Merged)");
 			}
 			
+			/*
 			unsigned int year, month, day;
 			unsigned int hour, minute, second;
 			Entry.m_Header.GetTimestampParts(year, month, day, hour, minute, second);
+			*/
 
-
+			/*
 			QString szTime;
 			szTime.sprintf("%02ld:%02ld:%02ld", hour, minute, second);
 			pSubItem->setText(3, szTime);
@@ -149,7 +173,9 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			szDate.sprintf("%.2ld-%.2ld-%4ld", day, month, year);
 			pSubItem->setText(4, szDate);
 			//pSubItem->setText(4, QDate(year, month, day).toString());
+			*/
 
+			/*
 			// file-attributes (Amiga-style: HSPA RWED)
 			QString szAttribs;
 			szAttribs.sprintf("%c%c%c%c%c%c%c%c", 
@@ -162,20 +188,25 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 							  (Entry.m_Attributes.e) ? 'e' : '-',
 							  (Entry.m_Attributes.d) ? 'd' : '-');
 			pSubItem->setText(5, szAttribs);
+			*/
 			
 			// packing mode
-			pSubItem->setText(6, QString::number(Entry.m_Header.GetPackMode()));
+			//pSubItem->setText(6, QString::number(Entry.m_Header.GetPackMode()));
 			
+			/*
 			QString szCrcA; // CRC of entry in archive
 			szCrcA.sprintf("%x", Entry.m_uiCrc);
 			pSubItem->setText(7, szCrcA);
+			*/
 
+			/*
 			QString szCrcD; // CRC of data
 			szCrcD.sprintf("%x", Entry.m_uiDataCrc);
 			pSubItem->setText(8, szCrcD);
+			*/
 			
 			// file-related comment (if any stored)
-			pSubItem->setText(9, QString::fromStdString(Entry.m_szComment));
+			//pSubItem->setText(9, QString::fromStdString(Entry.m_szComment));
 			
 			pTopItem->addChild(pSubItem);
 			
@@ -183,15 +214,14 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 		}
 		
 		QString szMessage;
-		szMessage.append(" Total files in archive: ").append(QString::number(ul.GetTotalFileCount()))
-				.append(" Total unpacked size: ").append(QString::number(ul.GetTotalSizeUnpacked()))
-				.append(" Archive file size: ").append(QString::number(ul.GetArchiveFileSize()));
-		*/
-
+		szMessage.append(" Total files in archive: ").append(QString::number(m_pLhaLib->GetTotalFileCount()))
+				.append(" Total unpacked size: ").append(QString::number(m_pLhaLib->GetTotalSizeUnpacked()))
+				.append(" Archive file size: ").append(QString::number(m_pLhaLib->GetArchiveFileSize()));
+			
 		ui->treeWidget->expandAll();
 		ui->treeWidget->resizeColumnToContents(0);
 		ui->treeWidget->sortByColumn(0);
-		//ui->statusBar->showMessage(szMessage);
+		ui->statusBar->showMessage(szMessage);
 	}
 	catch (std::exception &exp)
 	{
@@ -201,6 +231,13 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 	}
 }
 
+void MainWindow::onMessage(QString szData)
+{
+}
+
+void MainWindow::onWarning(QString szData)
+{
+}
 
 
 void MainWindow::on_actionAbout_triggered()
