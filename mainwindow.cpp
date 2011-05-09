@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_pLhaLib = new QLhALib(this);
 	connect(m_pLhaLib, SIGNAL(message(QString)), this, SLOT(onMessage(QString)));
 	connect(m_pLhaLib, SIGNAL(warning(QString)), this, SLOT(onWarning(QString)));
+	connect(m_pLhaLib, SIGNAL(error(QString)), this, SLOT(onError(QString)));
+	connect(m_pLhaLib, SIGNAL(fatal_error(QString)), this, SLOT(onFatalError(QString)));
 	
 	QStringList treeHeaders;
 	treeHeaders << "Name" 
@@ -103,9 +105,16 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 		m_pLhaLib->SetArchive(szArchiveFile);
 	
 		// collect list of files
-		m_pLhaLib->List(lstArchiveInfo);
+		if (m_pLhaLib->List(lstArchiveInfo) == true)
+		{
+			QString szMessage;
+			szMessage.append(" Total files in archive: ").append(QString::number(m_pLhaLib->GetTotalFileCount()))
+					.append(" Total unpacked size: ").append(QString::number(m_pLhaLib->GetTotalSizeUnpacked()))
+					.append(" Archive file size: ").append(QString::number(m_pLhaLib->GetArchiveFileSize()));
+			
+			ui->statusBar->showMessage(szMessage);
+		}
 		
-		// success: keep some info
 		setWindowTitle(m_szBaseTitle + " - " + szArchiveFile);
 		m_szCurrentArchive = szArchiveFile;
 		
@@ -203,15 +212,9 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			++it;
 		}
 		
-		QString szMessage;
-		szMessage.append(" Total files in archive: ").append(QString::number(m_pLhaLib->GetTotalFileCount()))
-				.append(" Total unpacked size: ").append(QString::number(m_pLhaLib->GetTotalSizeUnpacked()))
-				.append(" Archive file size: ").append(QString::number(m_pLhaLib->GetArchiveFileSize()));
-			
 		ui->treeWidget->expandAll();
 		ui->treeWidget->resizeColumnToContents(0);
 		ui->treeWidget->sortByColumn(0);
-		ui->statusBar->showMessage(szMessage);
 	}
 	catch (std::exception &exp)
 	{
@@ -247,10 +250,11 @@ void MainWindow::on_actionExtractAll_triggered()
 
 	try
 	{
-		m_pLhaLib->Extract(szDestPath);
-		
-		QString szOldMessage = ui->statusBar->currentMessage();
-		ui->statusBar->showMessage("Extract completed!", 10000);
+		if (m_pLhaLib->Extract(szDestPath) == true)
+		{
+			QString szOldMessage = ui->statusBar->currentMessage();
+			ui->statusBar->showMessage("Extract completed!", 10000);
+		}
 	}
 	catch (std::exception &exp)
 	{
@@ -263,10 +267,22 @@ void MainWindow::on_actionExtractAll_triggered()
 
 void MainWindow::onMessage(QString szData)
 {
+	ui->statusBar->showMessage(QString("Message: ").append(szData));
 }
 
 void MainWindow::onWarning(QString szData)
 {
+	ui->statusBar->showMessage(QString("Warning: ").append(szData));
+}
+
+void MainWindow::onError(QString szData)
+{
+	ui->statusBar->showMessage(QString("Error: ").append(szData));
+}
+
+void MainWindow::onFatalError(QString szData)
+{
+	ui->statusBar->showMessage(QString("Fatal error: ").append(szData));
 }
 
 

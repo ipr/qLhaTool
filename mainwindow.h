@@ -49,6 +49,8 @@ private slots:
 	
 	void onMessage(QString szData);
 	void onWarning(QString szData);
+	void onError(QString szData);
+	void onFatalError(QString szData);
 };
 
 #endif // MAINWINDOW_H
