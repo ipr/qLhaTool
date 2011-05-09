@@ -158,29 +158,12 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 				pSubItem->setText(2, "(Merged)");
 			}
 			
-
-			// TODO: check 
-			//pSubItem->setData(3, Qt::DisplayRole, Entry.m_Stamp.time());
 			QTime Time(Entry.m_Stamp.time());
 			pSubItem->setText(3, Time.toString("hh:mm:ss"));
 			
-			// TODO: check 
-			//pSubItem->setData(4, Qt::DisplayRole, Entry.m_Stamp.date());
 			QDate Date(Entry.m_Stamp.date());
-			pSubItem->setText(4, Date.toString("dd.MM.yyyy"));
+			pSubItem->setText(4, Date.toString("dd-MM-yyyy"));
 			
-			/*
-			QString szTime;
-			szTime.sprintf("%02ld:%02ld:%02ld", hour, minute, second);
-			pSubItem->setText(3, szTime);
-			//pSubItem->setText(3, QTime(hour, minute, second).toString());
-
-			QString szDate;
-			szDate.sprintf("%.2ld-%.2ld-%4ld", day, month, year);
-			pSubItem->setText(4, szDate);
-			//pSubItem->setText(4, QDate(year, month, day).toString());
-			*/
-
 			// packing mode
 			pSubItem->setText(5, Entry.m_szPackMode);
 
@@ -238,6 +221,46 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 	}
 }
 
+void MainWindow::on_actionExtractAll_triggered()
+{
+	QString szCurrentFilePath = m_szCurrentArchive;
+	if (szCurrentFilePath.length() > 0)
+	{
+		szCurrentFilePath.replace('\\', "/");
+		int iPos = szCurrentFilePath.lastIndexOf('/');
+		if (iPos != -1)
+		{
+			// open selection in path of current file?
+			szCurrentFilePath = szCurrentFilePath.left(iPos);
+		}
+		else
+		{
+			szCurrentFilePath.clear();
+		}
+	}
+
+    QString szDestPath = QFileDialog::getExistingDirectory(this, tr("Select path to extract to.."), szCurrentFilePath);
+    if (szDestPath == NULL)
+    {
+		return;
+    }
+
+	try
+	{
+		m_pLhaLib->Extract(szDestPath);
+		
+		QString szOldMessage = ui->statusBar->currentMessage();
+		ui->statusBar->showMessage("Extract completed!", 10000);
+	}
+	catch (std::exception &exp)
+	{
+		QMessageBox::warning(this, "Error caught",
+							 QString::fromLocal8Bit(exp.what()),
+							 QMessageBox::Ok);
+	}
+    
+}
+
 void MainWindow::onMessage(QString szData)
 {
 }
@@ -265,3 +288,4 @@ void MainWindow::on_actionAbout_triggered()
 	pTxt->append("");
 	pTxt->show();
 }
+

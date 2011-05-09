@@ -40,6 +40,7 @@ private:
 	void ClearAll();
 	
 private slots:
+    void on_actionExtractAll_triggered();
     void on_actionAbout_triggered();
     void on_actionFile_triggered();
 	

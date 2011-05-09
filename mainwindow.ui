@@ -44,13 +44,14 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionFile"/>
+   <addaction name="actionExtractAll"/>
    <addaction name="actionQuit"/>
    <addaction name="actionAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionFile">
    <property name="text">
-    <string>File</string>
+    <string>&amp;File</string>
    </property>
    <property name="shortcut">
     <string>F</string>
@@ -70,6 +71,14 @@
    </property>
    <property name="shortcut">
     <string>?</string>
+   </property>
+  </action>
+  <action name="actionExtractAll">
+   <property name="text">
+    <string>E&amp;xtract All</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
    </property>
   </action>
  </widget>
