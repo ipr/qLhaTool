@@ -9,6 +9,7 @@ namespace Ui {
     class MainWindow;
 }
 
+class QTextCodec;
 class QLhALib;
 
 class MainWindow : public QMainWindow
@@ -25,6 +26,9 @@ signals:
 private:
     Ui::MainWindow *ui;
 	QLhALib *m_pLhaLib;
+
+	QTextCodec *m_pCurrentCodec;
+	QString m_szCurrentCodec;
 	
 	QString m_szBaseTitle;
 	QString m_szCurrentArchive;
@@ -40,6 +44,7 @@ private:
 	void ClearAll();
 	
 private slots:
+    void on_actionTextCodec_triggered();
     void on_actionExtractAll_triggered();
     void on_actionAbout_triggered();
     void on_actionFile_triggered();
@@ -51,6 +56,8 @@ private slots:
 	void onWarning(QString szData);
 	void onError(QString szData);
 	void onFatalError(QString szData);
+	
+	void onTextCodec(QString szCodec);
 };
 
 #endif // MAINWINDOW_H

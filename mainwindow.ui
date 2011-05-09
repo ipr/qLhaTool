@@ -45,6 +45,7 @@
    </attribute>
    <addaction name="actionFile"/>
    <addaction name="actionExtractAll"/>
+   <addaction name="actionTextCodec"/>
    <addaction name="actionQuit"/>
    <addaction name="actionAbout"/>
   </widget>
@@ -79,6 +80,11 @@
    </property>
    <property name="shortcut">
     <string>X</string>
+   </property>
+  </action>
+  <action name="actionTextCodec">
+   <property name="text">
+    <string>Text codec</string>
    </property>
   </action>
  </widget>

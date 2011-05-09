@@ -11,11 +11,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    dialogselecttextcodec.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    dialogselecttextcodec.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    dialogselecttextcodec.ui
 
 INCLUDEPATH += ../qLhA
 LIBS += -lqLhA

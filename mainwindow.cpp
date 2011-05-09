@@ -4,7 +4,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextEdit>
+#include <QTextCodec>
 #include <QDateTime>
+
+#include "dialogselecttextcodec.h"
 
 #include "qlhalib.h"
 
@@ -13,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
 	m_pLhaLib(nullptr),
+	m_pCurrentCodec(nullptr),
+	m_szCurrentCodec(),
 	m_szBaseTitle(),
 	m_szCurrentArchive(),
 	m_PathToItem()
@@ -20,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 	m_szBaseTitle = windowTitle();
 	connect(this, SIGNAL(FileSelection(QString)), this, SLOT(onFileSelected(QString)));
+	
+	m_pCurrentCodec = QTextCodec::codecForLocale();
+	m_szCurrentCodec = QString(m_pCurrentCodec->name());
 	
 	m_pLhaLib = new QLhALib(this);
 	connect(m_pLhaLib, SIGNAL(message(QString)), this, SLOT(onMessage(QString)));
@@ -96,10 +104,16 @@ void MainWindow::on_actionFile_triggered()
 
 void MainWindow::onFileSelected(QString szArchiveFile)
 {
+	// test
+    //char *archive_delim = "\377\\"; /* `\' is for level 0 header and broken archive. */
+	
 	ClearAll(); // clear previous archive (if any)
 	try
 	{
 		QLhALib::tArchiveEntryList lstArchiveInfo;
+
+		// set text-conversion codec
+		m_pLhaLib->SetConversionCodec(m_pCurrentCodec);
 		
 		// set given file as archive
 		m_pLhaLib->SetArchive(szArchiveFile);
@@ -303,5 +317,37 @@ void MainWindow::on_actionAbout_triggered()
 	pTxt->append("? = about (this dialog)");
 	pTxt->append("");
 	pTxt->show();
+}
+
+
+void MainWindow::on_actionTextCodec_triggered()
+{
+	DialogSelectTextCodec *pDlg = new DialogSelectTextCodec(this);
+	connect(pDlg, SIGNAL(codecChanged(QString)), this, SLOT(onTextCodec(QString)));
+	
+	pDlg->show();
+}
+
+void MainWindow::onTextCodec(QString szCodec)
+{
+	if (m_szCurrentCodec == szCodec)
+	{
+		return;
+	}
+	
+	if (m_pCurrentCodec != nullptr)
+	{
+		m_pCurrentCodec = nullptr;
+	}
+	
+	m_szCurrentCodec = szCodec;
+	
+	if (m_szCurrentCodec.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_pCurrentCodec = QTextCodec::codecForName(m_szCurrentCodec.toAscii());
+	onFileSelected(m_szCurrentArchive);
 }
 
