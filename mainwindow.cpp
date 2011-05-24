@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_pLhaLib = new QLhALib(this);
 	connect(m_pLhaLib, SIGNAL(message(QString)), this, SLOT(onMessage(QString)));
 	connect(m_pLhaLib, SIGNAL(warning(QString)), this, SLOT(onWarning(QString)));
-	connect(m_pLhaLib, SIGNAL(error(QString)), this, SLOT(onError(QString)));
 	connect(m_pLhaLib, SIGNAL(fatal_error(QString)), this, SLOT(onFatalError(QString)));
 	
 	QStringList treeHeaders;
@@ -42,10 +41,11 @@ MainWindow::MainWindow(QWidget *parent) :
 			<< "Time" 
 			<< "Date" 
 			<< "Pack Mode" 
+			<< "Header level";
 			//<< "Attributes"
 			//<< "CRC (A)" 
 			//<< "CRC (D)" 
-			<< "Comment";
+			//<< "Comment";
 	ui->treeWidget->setColumnCount(treeHeaders.size());
 	ui->treeWidget->setHeaderLabels(treeHeaders);
 	
@@ -189,6 +189,9 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			
 			// packing mode
 			pSubItem->setText(5, Entry.m_szPackMode);
+			
+			// header level
+			pSubItem->setText(6, QString::number(Entry.m_ucHeaderLevel));
 
 			
 			/*
@@ -203,21 +206,15 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 							  (Entry.m_Attributes.w) ? 'w' : '-',
 							  (Entry.m_Attributes.e) ? 'e' : '-',
 							  (Entry.m_Attributes.d) ? 'd' : '-');
-			pSubItem->setText(6, szAttribs);
+			pSubItem->setText(7, szAttribs);
 			*/
 			
 			/*
 			QString szCrcA; // CRC of entry in archive
 			szCrcA.sprintf("%x", Entry.m_uiCrc);
-			pSubItem->setText(7, szCrcA);
+			pSubItem->setText(8, szCrcA);
 			*/
 
-			/*
-			QString szCrcD; // CRC of data
-			szCrcD.sprintf("%x", Entry.m_uiDataCrc);
-			pSubItem->setText(8, szCrcD);
-			*/
-			
 			// file-related comment (if any stored)
 			//pSubItem->setText(9, QString::fromStdString(Entry.m_szComment));
 			
@@ -287,11 +284,6 @@ void MainWindow::onMessage(QString szData)
 void MainWindow::onWarning(QString szData)
 {
 	ui->statusBar->showMessage(QString("Warning: ").append(szData));
-}
-
-void MainWindow::onError(QString szData)
-{
-	ui->statusBar->showMessage(QString("Error: ").append(szData));
 }
 
 void MainWindow::onFatalError(QString szData)
