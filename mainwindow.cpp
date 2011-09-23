@@ -263,7 +263,7 @@ void MainWindow::on_actionExtractAll_triggered()
 	{
 		if (m_pLhaLib->Extract(szDestPath) == true)
 		{
-			QString szOldMessage = ui->statusBar->currentMessage();
+			//QString szOldMessage = ui->statusBar->currentMessage();
 			ui->statusBar->showMessage("Extract completed!", 10000);
 		}
 	}
@@ -273,7 +273,24 @@ void MainWindow::on_actionExtractAll_triggered()
 							 QString::fromLocal8Bit(exp.what()),
 							 QMessageBox::Ok);
 	}
-    
+}
+
+void MainWindow::on_actionTest_triggered()
+{
+	try
+	{
+		if (m_pLhaLib->Test() == true)
+		{
+			//QString szOldMessage = ui->statusBar->currentMessage();
+			ui->statusBar->showMessage("Test completed successfully", 10000);
+		}
+	}
+	catch (std::exception &exp)
+	{
+		QMessageBox::warning(this, "Error caught",
+							 QString::fromLocal8Bit(exp.what()),
+							 QMessageBox::Ok);
+	}
 }
 
 void MainWindow::onMessage(QString szData)
@@ -290,7 +307,6 @@ void MainWindow::onFatalError(QString szData)
 {
 	ui->statusBar->showMessage(QString("Fatal error: ").append(szData));
 }
-
 
 void MainWindow::on_actionAbout_triggered()
 {
@@ -310,7 +326,6 @@ void MainWindow::on_actionAbout_triggered()
 	pTxt->append("");
 	pTxt->show();
 }
-
 
 void MainWindow::on_actionTextCodec_triggered()
 {

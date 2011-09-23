@@ -44,10 +44,14 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionFile"/>
+   <addaction name="separator"/>
    <addaction name="actionExtractAll"/>
+   <addaction name="actionTest"/>
+   <addaction name="separator"/>
    <addaction name="actionTextCodec"/>
    <addaction name="actionQuit"/>
    <addaction name="actionAbout"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionFile">
@@ -85,6 +89,17 @@
   <action name="actionTextCodec">
    <property name="text">
     <string>Text codec</string>
+   </property>
+  </action>
+  <action name="actionTest">
+   <property name="text">
+    <string>&amp;Test</string>
+   </property>
+   <property name="toolTip">
+    <string>Test extraction</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
    </property>
   </action>
  </widget>

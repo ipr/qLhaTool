@@ -51,6 +51,7 @@ private slots:
 	
 	void onFileSelected(QString szArchiveFile);
 	//void onFileLocated();
+	void on_actionTest_triggered();
 	
 	void onMessage(QString szData);
 	void onWarning(QString szData);
