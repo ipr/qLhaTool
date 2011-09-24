@@ -41,12 +41,16 @@ MainWindow::MainWindow(QWidget *parent) :
 			<< "Time" 
 			<< "Date" 
 			<< "Pack Mode" 
-			<< "Header level"
+			<< "Comment"
+			<< "User"
+			<< "Group"
+			<< "UID"
+			<< "GID"
 			//<< "Attributes"
 			//<< "CRC (A)" 
 			//<< "CRC (D)" 
-			<< "Extend" 
-			<< "Comment";
+			<< "HLev"
+			<< "OST";
 	ui->treeWidget->setColumnCount(treeHeaders.size());
 	ui->treeWidget->setHeaderLabels(treeHeaders);
 	
@@ -171,6 +175,9 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			QTreeWidgetItem *pSubItem = new QTreeWidgetItem(pTopItem);
 			pSubItem->setText(0, szFile);
 			pSubItem->setText(1, QString::number(Entry.m_ulUnpackedSize)); // always given
+			pSubItem->setText(2, QString::number(Entry.m_ulPackedSize)); // always given
+			
+			/* LZX only.. not LhA
 			if (Entry.m_bPackedSizeAvailable == true) // not merged
 			{
 				pSubItem->setText(2, QString::number(Entry.m_ulPackedSize)); // always given
@@ -181,6 +188,7 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 				// not supported by LHa...
 				pSubItem->setText(2, "(Merged)");
 			}
+			*/
 			
 			QTime Time(Entry.m_Stamp.time());
 			pSubItem->setText(3, Time.toString("hh:mm:ss"));
@@ -191,9 +199,16 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			// packing mode
 			pSubItem->setText(5, Entry.m_szPackMode);
 			
-			// header level
-			pSubItem->setText(6, QString::number(Entry.m_ucHeaderLevel));
+			// file-related comment (if any stored)
+			pSubItem->setText(6, Entry.m_szComment);
 
+			// Unix-style user&group
+			pSubItem->setText(7, Entry.m_szUser);
+			pSubItem->setText(8, Entry.m_szGroup);
+
+			// Unix-style user ID and group ID
+			pSubItem->setText(9, QString::number(Entry.m_unix_uid));
+			pSubItem->setText(10, QString::number(Entry.m_unix_gid));
 			
 			/*
 			// LZX: file-attributes (Amiga-style: HSPA RWED)
@@ -216,12 +231,12 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			pSubItem->setText(8, szCrcA);
 			*/
 
-			// extend-type for diagnostics (if any)
-			pSubItem->setText(7, Entry.m_extendType);
+			// header level
+			pSubItem->setText(11, QString::number(Entry.m_ucHeaderLevel));
 
-			// file-related comment (if any stored)
-			pSubItem->setText(8, Entry.m_szComment);
-			
+			// extend-type for diagnostics (if any)
+			pSubItem->setText(12, Entry.m_extendType);
+
 			pTopItem->addChild(pSubItem);
 			
 			++it;
