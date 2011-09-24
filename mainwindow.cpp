@@ -41,11 +41,12 @@ MainWindow::MainWindow(QWidget *parent) :
 			<< "Time" 
 			<< "Date" 
 			<< "Pack Mode" 
-			<< "Header level";
+			<< "Header level"
 			//<< "Attributes"
 			//<< "CRC (A)" 
 			//<< "CRC (D)" 
-			//<< "Comment";
+			<< "Extend" 
+			<< "Comment";
 	ui->treeWidget->setColumnCount(treeHeaders.size());
 	ui->treeWidget->setHeaderLabels(treeHeaders);
 	
@@ -215,8 +216,11 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			pSubItem->setText(8, szCrcA);
 			*/
 
+			// extend-type for diagnostics (if any)
+			pSubItem->setText(7, Entry.m_extendType);
+
 			// file-related comment (if any stored)
-			//pSubItem->setText(9, QString::fromStdString(Entry.m_szComment));
+			pSubItem->setText(8, Entry.m_szComment);
 			
 			pTopItem->addChild(pSubItem);
 			
