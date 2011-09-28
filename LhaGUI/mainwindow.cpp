@@ -47,8 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
 			<< "UID"
 			<< "GID"
 			//<< "Attributes"
-			//<< "CRC (A)" 
-			//<< "CRC (D)" 
+			<< "CRC (F)" 
+			//<< "CRC (H)" 
 			<< "HLev"
 			<< "OST";
 	ui->treeWidget->setColumnCount(treeHeaders.size());
@@ -109,9 +109,6 @@ void MainWindow::on_actionFile_triggered()
 
 void MainWindow::onFileSelected(QString szArchiveFile)
 {
-	// test
-    //char *archive_delim = "\377\\"; /* `\' is for level 0 header and broken archive. */
-	
 	ClearAll(); // clear previous archive (if any)
 	try
 	{
@@ -177,19 +174,6 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 			pSubItem->setText(1, QString::number(Entry.m_ulUnpackedSize)); // always given
 			pSubItem->setText(2, QString::number(Entry.m_ulPackedSize)); // always given
 			
-			/* LZX only.. not LhA
-			if (Entry.m_bPackedSizeAvailable == true) // not merged
-			{
-				pSubItem->setText(2, QString::number(Entry.m_ulPackedSize)); // always given
-			}
-			else
-			{
-				// merged? (no packed-size available)
-				// not supported by LHa...
-				pSubItem->setText(2, "(Merged)");
-			}
-			*/
-			
 			QTime Time(Entry.m_Stamp.time());
 			pSubItem->setText(3, Time.toString("hh:mm:ss"));
 			
@@ -222,20 +206,22 @@ void MainWindow::onFileSelected(QString szArchiveFile)
 							  (Entry.m_Attributes.w) ? 'w' : '-',
 							  (Entry.m_Attributes.e) ? 'e' : '-',
 							  (Entry.m_Attributes.d) ? 'd' : '-');
-			pSubItem->setText(7, szAttribs);
+			pSubItem->setText(11, szAttribs);
 			*/
 			
-			/*
-			QString szCrcA; // CRC of entry in archive
-			szCrcA.sprintf("%x", Entry.m_uiCrc);
-			pSubItem->setText(8, szCrcA);
-			*/
+			QString szCrcF; // CRC of file
+			szCrcF.sprintf("%x", Entry.m_uiCrc);
+			pSubItem->setText(11, szCrcF);
+
+			//QString szCrcH; // CRC of header
+			//szCrcH.sprintf("%x", Entry.m_uiHeaderCrc);
+			//pSubItem->setText(12, szCrcH);
 
 			// header level
-			pSubItem->setText(11, QString::number(Entry.m_ucHeaderLevel));
+			pSubItem->setText(12, QString::number(Entry.m_ucHeaderLevel));
 
 			// extend-type for diagnostics (if any)
-			pSubItem->setText(12, Entry.m_extendType);
+			pSubItem->setText(13, Entry.m_extendType);
 
 			pTopItem->addChild(pSubItem);
 			
@@ -338,8 +324,10 @@ void MainWindow::on_actionAbout_triggered()
 	pTxt->append("Program uses Qt 4.7.2 under LGPL v. 2.1");
 	pTxt->append("");
 	pTxt->append("Keyboard shortcuts:");
-	pTxt->append("");
 	pTxt->append("F = open LHa-file");
+	pTxt->append("X = eXtract all to..");
+	pTxt->append("T = Test extraction");
+	pTxt->append("C = codec");
 	pTxt->append("Esc = close");
 	pTxt->append("? = about (this dialog)");
 	pTxt->append("");
@@ -377,3 +365,13 @@ void MainWindow::onTextCodec(QString szCodec)
 	onFileSelected(m_szCurrentArchive);
 }
 
+
+void MainWindow::on_actionExpand_triggered()
+{
+    ui->treeWidget->expandAll();
+}
+
+void MainWindow::on_actionCollapse_triggered()
+{
+	ui->treeWidget->collapseAll();
+}

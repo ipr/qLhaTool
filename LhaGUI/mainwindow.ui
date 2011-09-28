@@ -49,9 +49,12 @@
    <addaction name="actionTest"/>
    <addaction name="separator"/>
    <addaction name="actionTextCodec"/>
+   <addaction name="separator"/>
    <addaction name="actionQuit"/>
    <addaction name="actionAbout"/>
    <addaction name="separator"/>
+   <addaction name="actionExpand"/>
+   <addaction name="actionCollapse"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionFile">
@@ -90,6 +93,9 @@
    <property name="text">
     <string>Text codec</string>
    </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
   </action>
   <action name="actionTest">
    <property name="text">
@@ -100,6 +106,16 @@
    </property>
    <property name="shortcut">
     <string>T</string>
+   </property>
+  </action>
+  <action name="actionExpand">
+   <property name="text">
+    <string>Expand</string>
+   </property>
+  </action>
+  <action name="actionCollapse">
+   <property name="text">
+    <string>Collapse</string>
    </property>
   </action>
  </widget>

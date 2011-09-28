@@ -58,6 +58,8 @@ private slots:
 	void onFatalError(QString szData);
 	
 	void onTextCodec(QString szCodec);
+	void on_actionExpand_triggered();
+	void on_actionCollapse_triggered();
 };
 
 #endif // MAINWINDOW_H

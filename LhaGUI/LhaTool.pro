@@ -20,8 +20,8 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     dialogselecttextcodec.ui
 
-INCLUDEPATH += ../qLhA
-LIBS += -lqLhA
+INCLUDEPATH += ../qLhALib
+LIBS += -lqLhALib
 
 CONFIG (debug, debug|release) 
 {

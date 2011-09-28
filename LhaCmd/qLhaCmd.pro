@@ -17,7 +17,7 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 INCLUDEPATH += ../qLhALib
-LIBS += -lqLhA
+LIBS += -lqLhALib
 
 CONFIG (debug, debug|release) 
 {
